@@ -14,6 +14,10 @@ const makeRandom = seed => {
   };
 };
 
+// A single local Canvas/SVG renderer is used on every browser so WeChat, mobile
+// WebViews, and desktop browsers all receive the same deterministic animation.
+const UNIVERSAL_COMPATIBILITY_RENDERER = true;
+
 const FALLBACK_PALETTE = [
   [215, 199, 255],
   [170, 139, 228],
@@ -121,22 +125,27 @@ function ShardFallback() {
 
     const createParticles = () => {
       const random = makeRandom(7781);
-      const count = Math.max(420, Math.min(760, Math.round((width * height) / 3000)));
-      particles = Array.from({ length: count }, (_, index) => ({
-        phase: random(),
-        lane: (random() - 0.5) * 2,
-        drift: random() * Math.PI * 2,
-        size: Math.pow(random(), 2.1),
-        depth: 0.24 + random() * 0.76,
-        speed: 0.006 + random() * 0.012,
-        angle: -0.34 + random() * 0.72,
-        spin: (random() - 0.5) * 0.16,
-        opacity: 0.15 + random() * 0.68,
-        twinkle: random() * Math.PI * 2,
-        track: index % 11 === 0 ? 1 : index % 7 === 0 ? 2 : 0,
-        tone: Math.floor(random() * FALLBACK_PALETTE.length),
-        shape: random()
-      }));
+      const count = Math.max(520, Math.min(820, Math.round((width * height) / 2400)));
+      particles = Array.from({ length: count }, (_, index) => {
+        const side = random() < 0.5 ? -1 : 1;
+        const vertical = (random() - 0.5) * (index % 7 === 0 ? 1.9 : 1.25);
+        return {
+          phase: random(),
+          side,
+          vertical,
+          spread: 0.42 + random() * 0.72,
+          drift: random() * Math.PI * 2,
+          size: Math.pow(random(), 2.05),
+          depth: 0.28 + random() * 0.72,
+          speed: 0.024 + random() * 0.038,
+          angle: (random() - 0.5) * 0.34,
+          spin: (random() - 0.5) * 0.12,
+          opacity: 0.16 + random() * 0.72,
+          twinkle: random() * Math.PI * 2,
+          tone: Math.floor(random() * FALLBACK_PALETTE.length),
+          shape: random()
+        };
+      });
     };
 
     const resize = () => {
@@ -166,38 +175,30 @@ function ShardFallback() {
     };
 
     const draw = timestamp => {
-      const motionScale = reduceMotion.matches ? 0.22 : 1;
+      const motionScale = reduceMotion.matches ? 0.58 : 1;
       const elapsed = ((timestamp - startTime) / 1000) * motionScale;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
 
       for (const particle of particles) {
         const progress = (particle.phase + elapsed * particle.speed) % 1;
-        const travel = progress * 1.22 - 0.11;
+        const travel = Math.pow(progress, 1.58);
         const wave = Math.sin(progress * Math.PI);
-        const perspective = 0.34 + wave * 0.96;
-        let centerY;
-        let envelope;
-
-        if (particle.track === 1) {
-          centerY = height * (0.08 + progress * 0.23 + Math.sin(progress * 7 + 0.7) * 0.025);
-          envelope = height * (0.07 + wave * 0.1);
-        } else if (particle.track === 2) {
-          centerY = height * (0.26 + progress * 0.42 + Math.sin(progress * 6.2 + 1.8) * 0.045);
-          envelope = height * (0.1 + wave * 0.16);
-        } else {
-          centerY = height * (0.14 + progress * 0.3 + Math.sin(progress * 7.4 + 1.1) * 0.05);
-          envelope = height * (0.095 + wave * 0.2);
-        }
-
-        const x = travel * width + Math.sin(particle.drift + elapsed * 0.11) * width * 0.009;
-        const y = centerY + particle.lane * envelope + Math.sin(particle.drift + progress * 13) * height * 0.018;
-        const size = (1.2 + particle.size * 14) * perspective * particle.depth;
-        const shardWidth = Math.max(1.2, size * (1.7 + particle.shape * 1.4));
-        const shardHeight = Math.max(0.65, size * (0.22 + particle.shape * 0.32));
-        const rotation = particle.angle + progress * 0.3 + elapsed * particle.spin;
-        const shimmer = 0.62 + Math.sin(elapsed * 0.9 + particle.twinkle) * 0.26;
-        const alpha = particle.opacity * particle.depth * shimmer * (0.3 + wave * 0.7);
+        const originX = width * (0.5 + Math.sin(elapsed * 0.09) * 0.012);
+        const originY = height * (width < height ? 0.43 : 0.47);
+        const horizontalReach = width * (0.08 + travel * 0.68) * particle.spread;
+        const verticalReach = height * (0.018 + travel * 0.58) * particle.vertical;
+        const x = originX + particle.side * horizontalReach + Math.sin(particle.drift + elapsed * 0.25) * width * 0.007;
+        const y = originY + verticalReach + Math.cos(particle.drift + progress * 8) * height * 0.009;
+        const perspective = 0.18 + travel * 2.15;
+        const size = (0.75 + particle.size * 10.5) * perspective * particle.depth;
+        const shardWidth = Math.max(1.2, size * (2.15 + particle.shape * 1.65));
+        const shardHeight = Math.max(0.58, size * (0.18 + particle.shape * 0.25));
+        const radialAngle = Math.atan2(y - originY, x - originX);
+        const rotation = radialAngle + particle.angle + elapsed * particle.spin;
+        const shimmer = 0.68 + Math.sin(elapsed * 1.1 + particle.twinkle) * 0.24;
+        const edgeFade = Math.min(1, (1 - progress) * 7.5);
+        const alpha = particle.opacity * particle.depth * shimmer * (0.16 + wave * 0.84) * edgeFade;
         const color = FALLBACK_PALETTE[particle.tone];
 
         if (particle.size > 0.72) {
@@ -1656,6 +1657,12 @@ export default function AeroShards({
     const canvas = canvasRef.current;
     const root = rootRef.current;
     if (!canvas || !root) return;
+
+    if (UNIVERSAL_COMPATIBILITY_RENDERER) {
+      setReady(false);
+      setFailed(true);
+      return undefined;
+    }
     resetPointerMotion(pointerRef.current);
     ripplesRef.current = createRipples();
     holdRef.current = createHold();
