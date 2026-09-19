@@ -1,0 +1,12 @@
+<svg width="1600" height="820" viewBox="0 0 1600 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1600" height="820" fill="#100D16"/>
+<defs><linearGradient id="a" x1="0" y1="0" x2="1600" y2="820" gradientUnits="userSpaceOnUse"><stop stop-color="#1A1222"/><stop offset=".52" stop-color="#4B275B"/><stop offset="1" stop-color="#9B5ACA"/></linearGradient><filter id="b"><feGaussianBlur stdDeviation="30"/></filter></defs>
+<rect width="1600" height="820" fill="url(#a)"/>
+<path d="M0 595L570 295L855 462L1320 170L1600 292V820H0V595Z" fill="#0D0A12" fill-opacity=".72"/>
+<path d="M0 595L570 295L855 462L1320 170L1600 292" stroke="#BC8AE2" stroke-width="5"/>
+<circle cx="570" cy="295" r="65" fill="#A855F7" fill-opacity=".55" filter="url(#b)"/><circle cx="1320" cy="170" r="65" fill="#A855F7" fill-opacity=".55" filter="url(#b)"/>
+<g stroke="#D7B9ED" stroke-opacity=".2"><path d="M0 100H1600M0 200H1600M0 300H1600M0 400H1600M0 500H1600M0 600H1600M0 700H1600"/><path d="M200 0V820M400 0V820M600 0V820M800 0V820M1000 0V820M1200 0V820M1400 0V820"/></g>
+<text x="80" y="115" fill="#C39BE5" font-family="monospace" font-size="18" letter-spacing="4">16,000,000 VIEWS / TOP PERFORMANCE</text>
+<text x="80" y="625" fill="#F7F2FC" font-family="Arial" font-weight="700" font-size="112">速度，制造注意力。</text>
+<text x="84" y="690" fill="#C39BE5" font-family="monospace" font-size="20">CSGO HIGHLIGHT SERIES — 03</text>
+</svg>

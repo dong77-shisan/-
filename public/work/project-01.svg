@@ -1,0 +1,12 @@
+<svg width="1600" height="820" viewBox="0 0 1600 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1600" height="820" fill="#100D16"/>
+<defs><radialGradient id="a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1030 420) rotate(180) scale(740 580)"><stop stop-color="#A98CFF" stop-opacity=".6"/><stop offset=".48" stop-color="#32233F"/><stop offset="1" stop-color="#100D16"/></radialGradient><filter id="b"><feGaussianBlur stdDeviation="38"/></filter></defs>
+<rect width="1600" height="820" fill="url(#a)"/>
+<g opacity=".4" stroke="#D0B7F4"><circle cx="1050" cy="400" r="270"/><circle cx="1050" cy="400" r="195"/><circle cx="1050" cy="400" r="120"/></g>
+<path d="M0 700C330 670 510 490 750 330C950 195 1240 120 1600 150" stroke="#A98CFF" stroke-width="16"/>
+<circle cx="750" cy="330" r="80" fill="#A98CFF" filter="url(#b)"/>
+<text x="80" y="125" fill="#F7F2FC" font-family="Arial" font-weight="700" font-size="42">AI KNOWLEDGE</text>
+<text x="82" y="163" fill="#A89CB4" font-family="monospace" font-size="15" letter-spacing="3">SCIENCE / MOTION / EDITORIAL</text>
+<text x="80" y="675" fill="#F7F2FC" font-family="Arial" font-weight="700" font-size="112">信息，正在重组。</text>
+<text x="84" y="730" fill="#A98CFF" font-family="monospace" font-size="20">CHQ — SELECTED WORK 01</text>
+</svg>

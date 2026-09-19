@@ -1,0 +1,27 @@
+.line-sidebar {
+  --accent-color: #c8ff19;
+  --text-color: #c4c4c4;
+  --marker-color: #6c6c6c;
+  --marker-length: 38px;
+  --marker-gap: 0px;
+  --tick-scale: .42;
+  --max-shift: 18px;
+  --item-gap: 18px;
+  --font-size: .72rem;
+  --smoothing: 100ms;
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.line-sidebar--markers { padding-left: calc(var(--marker-length) + var(--marker-gap)); }
+.line-sidebar__list { list-style: none; margin: 0; padding: 1rem 0; display: flex; flex-direction: column; gap: var(--item-gap); }
+.line-sidebar__item { position: relative; cursor: pointer; outline: none; }
+.line-sidebar__item::before { content: ''; position: absolute; inset: -7px -34px; }
+.line-sidebar__label { position: relative; display: inline-flex; align-items: baseline; font-size: var(--font-size); line-height: 1.2; font-family: var(--mono); letter-spacing: .08em; white-space: nowrap; color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--text-color)); transform: translateX(calc(var(--effect, 0) * var(--max-shift))); }
+.line-sidebar__index { min-width: 22px; margin-right: .48rem; font-size: .72em; opacity: calc(.45 + var(--effect, 0) * .55); }
+.line-sidebar__text { font-size: .9em; }
+.line-sidebar__marker { position: absolute; top: 50%; left: calc(-1 * var(--marker-length) - var(--marker-gap)); height: 1px; width: var(--marker-length); background-color: color-mix(in srgb, var(--accent-color) calc(var(--effect, 0) * 100%), var(--marker-color)); transform-origin: left center; transform: translateY(-50%) scaleX(calc(.7 + var(--effect, 0) * .5)); }
+.line-sidebar--markers .line-sidebar__item:not(:last-child)::after { content: ''; position: absolute; top: calc(100% + var(--item-gap) / 2); left: calc(-1 * var(--marker-length) - var(--marker-gap)); height: 1px; width: calc(var(--marker-length) * var(--tick-scale)); background-color: var(--marker-color); opacity: .5; transform: translateY(-50%); }
+.line-sidebar--scale-tick .line-sidebar__item:not(:last-child)::after { transform-origin: left center; transform: translateY(-50%) scaleX(calc(.7 + var(--effect, 0) * .6)); }
+.line-sidebar__item:focus-visible .line-sidebar__label { outline: 1px solid var(--accent-color); outline-offset: 5px; }

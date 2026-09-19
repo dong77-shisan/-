@@ -1,0 +1,12 @@
+<svg width="1600" height="820" viewBox="0 0 1600 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1600" height="820" fill="#100D16"/>
+<defs><linearGradient id="a" x1="0" y1="0" x2="1600" y2="820" gradientUnits="userSpaceOnUse"><stop stop-color="#171120"/><stop offset=".5" stop-color="#39264D"/><stop offset="1" stop-color="#75579A"/></linearGradient><filter id="b"><feGaussianBlur stdDeviation="45"/></filter></defs>
+<rect width="1600" height="820" fill="url(#a)"/>
+<ellipse cx="1140" cy="420" rx="320" ry="420" fill="#C9A8ED" fill-opacity=".16" filter="url(#b)"/>
+<path d="M880 820L1100 0H1410L1230 820H880Z" fill="#E0CCF4" fill-opacity=".12"/>
+<path d="M950 820L1130 0M1100 820L1270 0M1250 820L1410 0" stroke="#D8B9F4" stroke-opacity=".3"/>
+<rect x="82" y="92" width="214" height="33" fill="#DCC8EF"/><text x="98" y="115" fill="#21162B" font-family="monospace" font-size="14">FOUNDER'S STORY</text>
+<text x="80" y="625" fill="#F7F2FC" font-family="Arial" font-weight="700" font-size="110">人物成为品牌。</text>
+<text x="84" y="687" fill="#B99ADD" font-family="monospace" font-size="19" letter-spacing="2">PLANNING — SHOOTING — EDITING — OPERATION</text>
+<circle cx="1380" cy="120" r="42" stroke="#E0CCF4" stroke-opacity=".6"/><path d="M1365 120H1395M1380 105V135" stroke="#E0CCF4"/>
+</svg>
