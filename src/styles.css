@@ -191,7 +191,8 @@ img, video { display: block; width: 100%; }
 .contact-main > p { margin: 0 0 25px; color: #8b918a; font-size: 13px; }
 .contact-main h2 { margin: 0; font-size: clamp(65px, 10.5vw, 180px); font-weight: 600; line-height: .78; letter-spacing: -.085em; }
 .contact-main h2 span { color: transparent; -webkit-text-stroke: 1px #6d736d; }
-.mail-button { width: min(470px, 100%); margin-top: clamp(45px, 7vh, 80px); padding: 18px 0; display: grid; grid-template-columns: 1fr auto auto; gap: 20px; align-items: center; border-block: 1px solid #414641; transition: .25s ease; }
+.contact-actions { width: min(470px, 100%); margin-top: clamp(45px, 7vh, 80px); display: grid; gap: 12px; }
+.mail-button { width: 100%; padding: 18px 0; display: grid; grid-template-columns: 1fr auto auto; gap: 20px; align-items: center; border-block: 1px solid #414641; transition: .25s ease; }
 .mail-button:hover { color: var(--acid); border-color: var(--acid); }
 .mail-button span { font-size: 14px; }
 .mail-button small { color: #747a73; font: 9px var(--mono); }

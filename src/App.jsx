@@ -419,11 +419,18 @@ function App() {
           <div className="contact-main">
             <p>有项目，或只是想聊聊？</p>
             <h2>LET’S MAKE<br /><span>SOMETHING</span> MOVE.</h2>
-            <a href="mailto:473572344@qq.com" className="mail-button">
-              <span>发送邮件</span>
-              <small>473572344@qq.com</small>
-              <ArrowUpRight />
-            </a>
+            <div className="contact-actions">
+              <a href="mailto:473572344@qq.com" className="mail-button">
+                <span>发送邮件</span>
+                <small>473572344@qq.com</small>
+                <ArrowUpRight />
+              </a>
+              <a href="tel:18460348419" className="mail-button">
+                <span>联系电话（同微信）</span>
+                <small>18460348419</small>
+                <ArrowUpRight />
+              </a>
+            </div>
           </div>
           <div className="contact-bottom">
             <Logo />
