@@ -22,6 +22,84 @@ const FALLBACK_PALETTE = [
   [134, 151, 222]
 ];
 
+const createStaticFallbackShards = () => {
+  const random = makeRandom(260919);
+  return Array.from({ length: 520 }, (_, index) => {
+    const progress = random();
+    const wave = Math.sin(progress * Math.PI);
+    const track = index % 13 === 0 ? 1 : index % 8 === 0 ? 2 : 0;
+    const centerY = track === 1
+      ? 92 + progress * 205 + Math.sin(progress * 7.2 + 0.4) * 28
+      : track === 2
+        ? 238 + progress * 330 + Math.sin(progress * 6.4 + 1.5) * 52
+        : 155 + progress * 275 + Math.sin(progress * 7.7 + 1.1) * 42;
+    const spread = track === 1 ? 76 + wave * 82 : track === 2 ? 110 + wave * 145 : 92 + wave * 175;
+    const x = -70 + progress * 1740 + (random() - 0.5) * 62;
+    const y = centerY + (random() - 0.5) * spread * 2;
+    const depth = 0.28 + random() * 0.72;
+    const size = (1.2 + Math.pow(random(), 2.35) * 8.5) * (0.48 + wave * 0.72) * depth;
+    const shardWidth = Math.max(1.4, size * (1.65 + random() * 1.55));
+    const shardHeight = Math.max(0.65, size * (0.22 + random() * 0.34));
+    const tip = shardWidth * (0.16 + random() * 0.26);
+    const skew = (random() - 0.5) * shardHeight * 0.9;
+    const angle = -18 + progress * 25 + (random() - 0.5) * 34;
+    const opacity = (0.14 + random() * 0.66) * depth * (0.48 + wave * 0.52);
+    return {
+      id: index,
+      points: (-shardWidth / 2) + ',' + (-shardHeight / 2 + skew) + ' ' +
+        (shardWidth / 2) + ',' + (-shardHeight / 2) + ' ' +
+        (shardWidth / 2 - tip) + ',' + (shardHeight / 2 - skew) + ' ' +
+        (-shardWidth / 2 + tip) + ',' + (shardHeight / 2),
+      transform: 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') rotate(' + angle.toFixed(2) + ')',
+      opacity: opacity.toFixed(3),
+      tone: index % 17 === 0 ? 'white' : index % 9 === 0 ? 'blue' : 'violet'
+    };
+  });
+};
+
+const STATIC_FALLBACK_SHARDS = createStaticFallbackShards();
+
+function StaticShardField() {
+  return (
+    <svg
+      className="aero-shards__fallback-static"
+      viewBox="0 0 1600 900"
+      preserveAspectRatio="xMidYMid slice"
+      focusable="false"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="fallback-static-violet" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#eee5ff" />
+          <stop offset="0.42" stopColor="#a98be6" />
+          <stop offset="1" stopColor="#684b94" stopOpacity="0.28" />
+        </linearGradient>
+        <linearGradient id="fallback-static-blue" x1="0" y1="0" x2="1" y2="0.7">
+          <stop offset="0" stopColor="#d8e0ff" />
+          <stop offset="0.5" stopColor="#7d75c8" />
+          <stop offset="1" stopColor="#3c315f" stopOpacity="0.24" />
+        </linearGradient>
+        <linearGradient id="fallback-static-white" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="0.48" stopColor="#d9caff" />
+          <stop offset="1" stopColor="#8065aa" stopOpacity="0.3" />
+        </linearGradient>
+      </defs>
+      <g className="aero-shards__fallback-static-field">
+        {STATIC_FALLBACK_SHARDS.map(shard => (
+          <polygon
+            key={shard.id}
+            points={shard.points}
+            transform={shard.transform}
+            opacity={shard.opacity}
+            fill={'url(#fallback-static-' + shard.tone + ')'}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
 function ShardFallback() {
   const fallbackCanvasRef = useRef(null);
 
@@ -181,6 +259,7 @@ function ShardFallback() {
   return (
     <div className="aero-shards__fallback" aria-hidden="true">
       <div className="aero-shards__fallback-glow" />
+      <StaticShardField />
       <canvas ref={fallbackCanvasRef} className="aero-shards__fallback-canvas" />
     </div>
   );

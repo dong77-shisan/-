@@ -57,9 +57,28 @@
   transform: rotate(2deg);
 }
 
-.aero-shards__fallback-canvas {
+.aero-shards__fallback-static {
   position: absolute;
   z-index: 1;
+  inset: -3%;
+  display: block;
+  width: 106%;
+  height: 106%;
+  overflow: visible;
+  opacity: 0.72;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 3px rgba(154, 120, 218, 0.18));
+}
+
+.aero-shards__fallback-static-field {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: aero-static-shards-drift 20s ease-in-out infinite alternate;
+}
+
+.aero-shards__fallback-canvas {
+  position: absolute;
+  z-index: 2;
   inset: 0;
   display: block;
   width: 100%;
@@ -91,10 +110,19 @@
 }
 
 
+@keyframes aero-static-shards-drift {
+  from { transform: translate3d(-0.8%, -0.35%, 0) rotate(-0.18deg) scale(1.01); }
+  to { transform: translate3d(0.9%, 0.55%, 0) rotate(0.22deg) scale(1.018); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aero-shards__canvas,
   .aero-shards__fallback {
     transition: none;
+  }
+
+  .aero-shards__fallback-static-field {
+    animation: none;
   }
 
 }
