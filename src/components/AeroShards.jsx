@@ -106,6 +106,7 @@ function StaticShardField() {
 
 function ShardFallback() {
   const fallbackCanvasRef = useRef(null);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   useEffect(() => {
     const canvas = fallbackCanvasRef.current;
@@ -121,23 +122,27 @@ function ShardFallback() {
     let height = 1;
     let dpr = 1;
     let lastFrame = 0;
+    let hasPresented = false;
     const startTime = performance.now();
 
     const createParticles = () => {
       const random = makeRandom(7781);
-      const count = Math.max(520, Math.min(820, Math.round((width * height) / 2400)));
+      // Keep the composition intentional on wide desktop screens. The previous
+      // fallback stacked 500+ SVG shards with as many as 820 canvas shards,
+      // which turned the hero into a field of tiny confetti at 2K resolutions.
+      const count = Math.max(220, Math.min(360, Math.round((width * height) / 7200)));
       particles = Array.from({ length: count }, (_, index) => {
         const side = random() < 0.5 ? -1 : 1;
-        const vertical = (random() - 0.5) * (index % 7 === 0 ? 1.9 : 1.25);
+        const vertical = (random() - 0.5) * (index % 9 === 0 ? 1.72 : 1.08);
         return {
           phase: random(),
           side,
           vertical,
-          spread: 0.42 + random() * 0.72,
+          spread: 0.5 + random() * 0.58,
           drift: random() * Math.PI * 2,
-          size: Math.pow(random(), 2.05),
-          depth: 0.28 + random() * 0.72,
-          speed: 0.024 + random() * 0.038,
+          size: Math.pow(random(), 1.45),
+          depth: 0.34 + Math.pow(random(), 0.72) * 0.66,
+          speed: 0.045 + random() * 0.045,
           angle: (random() - 0.5) * 0.34,
           spin: (random() - 0.5) * 0.12,
           opacity: 0.16 + random() * 0.72,
@@ -175,30 +180,32 @@ function ShardFallback() {
     };
 
     const draw = timestamp => {
-      const motionScale = reduceMotion.matches ? 0.58 : 1;
+      // The visual is a core part of the hero, so reduced-motion keeps a slow
+      // drift instead of freezing the shards completely.
+      const motionScale = reduceMotion.matches ? 0.68 : 1;
       const elapsed = ((timestamp - startTime) / 1000) * motionScale;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
 
       for (const particle of particles) {
         const progress = (particle.phase + elapsed * particle.speed) % 1;
-        const travel = Math.pow(progress, 1.58);
+        const travel = Math.pow(progress, 1.34);
         const wave = Math.sin(progress * Math.PI);
         const originX = width * (0.5 + Math.sin(elapsed * 0.09) * 0.012);
         const originY = height * (width < height ? 0.43 : 0.47);
-        const horizontalReach = width * (0.08 + travel * 0.68) * particle.spread;
-        const verticalReach = height * (0.018 + travel * 0.58) * particle.vertical;
-        const x = originX + particle.side * horizontalReach + Math.sin(particle.drift + elapsed * 0.25) * width * 0.007;
-        const y = originY + verticalReach + Math.cos(particle.drift + progress * 8) * height * 0.009;
-        const perspective = 0.18 + travel * 2.15;
-        const size = (0.75 + particle.size * 10.5) * perspective * particle.depth;
-        const shardWidth = Math.max(1.2, size * (2.15 + particle.shape * 1.65));
-        const shardHeight = Math.max(0.58, size * (0.18 + particle.shape * 0.25));
+        const horizontalReach = width * (0.055 + travel * 0.7) * particle.spread;
+        const verticalReach = height * (0.012 + travel * 0.55) * particle.vertical;
+        const x = originX + particle.side * horizontalReach + Math.sin(particle.drift + elapsed * 0.34) * width * 0.009;
+        const y = originY + verticalReach + Math.cos(particle.drift + progress * 8) * height * 0.012;
+        const perspective = 0.3 + travel * 2.32;
+        const size = (1.05 + particle.size * 9.8) * perspective * particle.depth;
+        const shardWidth = Math.max(2.4, size * (2.05 + particle.shape * 1.48));
+        const shardHeight = Math.max(0.9, size * (0.2 + particle.shape * 0.27));
         const radialAngle = Math.atan2(y - originY, x - originX);
         const rotation = radialAngle + particle.angle + elapsed * particle.spin;
         const shimmer = 0.68 + Math.sin(elapsed * 1.1 + particle.twinkle) * 0.24;
         const edgeFade = Math.min(1, (1 - progress) * 7.5);
-        const alpha = particle.opacity * particle.depth * shimmer * (0.16 + wave * 0.84) * edgeFade;
+        const alpha = particle.opacity * particle.depth * shimmer * (0.22 + wave * 0.78) * edgeFade;
         const color = FALLBACK_PALETTE[particle.tone];
 
         if (particle.size > 0.72) {
@@ -230,6 +237,10 @@ function ShardFallback() {
 
       context.shadowBlur = 0;
       context.globalCompositeOperation = 'source-over';
+      if (!hasPresented) {
+        hasPresented = true;
+        setCanvasReady(true);
+      }
       frameId = requestAnimationFrame(render);
     };
 
@@ -259,7 +270,7 @@ function ShardFallback() {
   }, []);
 
   return (
-    <div className="aero-shards__fallback" aria-hidden="true">
+    <div className="aero-shards__fallback" data-canvas-ready={canvasReady} aria-hidden="true">
       <div className="aero-shards__fallback-glow" />
       <StaticShardField />
       <canvas ref={fallbackCanvasRef} className="aero-shards__fallback-canvas" />
