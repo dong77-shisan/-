@@ -456,6 +456,14 @@ function App() {
                   allowFullScreen
                   referrerPolicy="no-referrer-when-downgrade"
                 />
+              ) : activeProject.douyin ? (
+                <iframe
+                  src={`https://open.douyin.com/player/video?vid=${activeProject.douyin}&autoplay=1`}
+                  title={`${activeProject.title} 在线播放`}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               ) : activeProject.video ? (
                 <video src={activeProject.video} controls autoPlay poster={activeProject.image} />
               ) : (
