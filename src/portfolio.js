@@ -3,9 +3,10 @@ const productionVideoBaseUrl = (
   import.meta.env.VITE_VIDEO_BASE_URL
   || 'https://media.githubusercontent.com/media/dong77-shisan/-/main/public/videos'
 ).replace(/\/$/, '');
+const productionVideoVersion = import.meta.env.VITE_VIDEO_VERSION || '20260919-optimized';
 
 const videoUrl = (fileName) =>
-  `${import.meta.env.DEV ? localVideoBaseUrl : productionVideoBaseUrl}/${fileName}`;
+  `${import.meta.env.DEV ? localVideoBaseUrl : productionVideoBaseUrl}/${fileName}${import.meta.env.DEV ? '' : `?v=${encodeURIComponent(productionVideoVersion)}`}`;
 
 export const siteConfig = {
   heroVideo: '', // 例如：'/media/hero-showreel.mp4'

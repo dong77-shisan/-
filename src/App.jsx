@@ -83,6 +83,48 @@ function Logo() {
   );
 }
 
+function PortfolioVideo({ src, poster, title }) {
+  const [playbackState, setPlaybackState] = useState('loading');
+  const [hasError, setHasError] = useState(false);
+
+  const showLoading = !hasError && (playbackState === 'loading' || playbackState === 'buffering');
+  const statusText = playbackState === 'buffering' ? '正在缓冲，请稍候…' : '正在加载视频…';
+
+  return (
+    <div className={`portfolio-video-player ${showLoading ? 'is-loading' : ''} ${hasError ? 'has-error' : ''}`}>
+      <video
+        key={src}
+        src={src}
+        controls
+        autoPlay
+        playsInline
+        preload="auto"
+        poster={poster}
+        aria-label={`${title} 视频播放器`}
+        onLoadStart={() => { setHasError(false); setPlaybackState('loading'); }}
+        onWaiting={() => setPlaybackState('buffering')}
+        onStalled={() => setPlaybackState('buffering')}
+        onCanPlay={() => setPlaybackState('ready')}
+        onPlaying={() => setPlaybackState('ready')}
+        onError={() => { setHasError(true); setPlaybackState('error'); }}
+      />
+      {showLoading && (
+        <div className="video-loading-state" role="status" aria-live="polite">
+          <span className="video-loading-spinner" aria-hidden="true" />
+          <strong>{statusText}</strong>
+          <small>已针对网页播放优化，首次打开会预载少量内容</small>
+        </div>
+      )}
+      {hasError && (
+        <div className="video-error-state" role="alert">
+          <strong>视频暂时无法加载</strong>
+          <small>请检查网络后关闭窗口并重新打开</small>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SectionTicker() {
   return (
     <div className="work-transition" aria-hidden="true">
@@ -450,7 +492,11 @@ function App() {
                   referrerPolicy="no-referrer-when-downgrade"
                 />
               ) : activeProject.video ? (
-                <video src={activeProject.video} controls autoPlay poster={activeProject.image} />
+                <PortfolioVideo
+                  src={activeProject.video}
+                  poster={activeProject.image}
+                  title={activeProject.title}
+                />
               ) : (
                 <div className="video-placeholder">
                   <img src={activeProject.image} alt="项目封面" />
