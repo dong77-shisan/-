@@ -32,3 +32,12 @@ heroVideo: '/media/hero-showreel.mp4'
 ```
 
 未填写时会自动显示当前的抽象视觉海报。
+
+## Cloudflare Pages 部署
+
+- 构建命令：`pnpm run build`
+- 输出目录：`dist`
+- 本地开发继续使用 `public/videos/` 中的视频。
+- 生产构建会排除超过 Pages 单文件限制的本地 MP4，并使用 `VITE_VIDEO_BASE_URL` 指向外部视频存储。
+- 未设置该变量时，线上版本默认从当前 GitHub LFS 仓库读取视频。
+- 正式上线建议将视频上传到 Cloudflare R2，再把 `VITE_VIDEO_BASE_URL` 设置为 R2 公共地址下的 `videos` 路径。

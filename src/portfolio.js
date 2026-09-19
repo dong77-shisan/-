@@ -1,3 +1,12 @@
+const localVideoBaseUrl = '/videos';
+const productionVideoBaseUrl = (
+  import.meta.env.VITE_VIDEO_BASE_URL
+  || 'https://media.githubusercontent.com/media/dong77-shisan/-/main/public/videos'
+).replace(/\/$/, '');
+
+const videoUrl = (fileName) =>
+  `${import.meta.env.DEV ? localVideoBaseUrl : productionVideoBaseUrl}/${fileName}`;
+
 export const siteConfig = {
   heroVideo: '', // 例如：'/media/hero-showreel.mp4'
 };
@@ -35,7 +44,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-bilibili-course-lead.png',
-    video: '/videos/bilibili-course-lead.mp4',
+    video: videoUrl('bilibili-course-lead.mp4'),
     theme: 'acid',
     description: '个人负责视频后期全流程。',
   },
@@ -49,7 +58,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-bilibili-flova-commercial.png',
-    video: '/videos/bilibili-flova-commercial.mp4',
+    video: videoUrl('bilibili-flova-commercial.mp4'),
     theme: 'acid',
     description: '个人负责视频后期全流程。',
   },
@@ -63,7 +72,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-bilibili-deepseek-commercial.png',
-    video: '/videos/bilibili-deepseek-commercial.mp4',
+    video: videoUrl('bilibili-deepseek-commercial.mp4'),
     theme: 'acid',
     description: '个人负责视频后期全流程。',
   },
@@ -77,7 +86,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-game-01.png',
-    video: '/videos/game-01.mp4',
+    video: videoUrl('game-01.mp4'),
     theme: 'orange',
     description: '个人负责视频后期全流程。',
   },
@@ -91,7 +100,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-game-02.png',
-    video: '/videos/game-02.mp4',
+    video: videoUrl('game-02.mp4'),
     theme: 'orange',
     description: '个人负责视频后期全流程。',
   },
@@ -105,7 +114,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-game-03.png',
-    video: '/videos/game-03.mp4',
+    video: videoUrl('game-03.mp4'),
     theme: 'orange',
     description: '个人负责视频后期全流程。',
   },
@@ -119,7 +128,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-ai-123.png',
-    video: '/videos/ai-123.mp4',
+    video: videoUrl('ai-123.mp4'),
     theme: 'violet',
     description: '个人负责视频后期全流程。',
   },
@@ -133,7 +142,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-ai-aigc.png',
-    video: '/videos/ai-aigc.mp4',
+    video: videoUrl('ai-aigc.mp4'),
     theme: 'violet',
     description: '个人负责视频后期全流程。',
   },
@@ -147,7 +156,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-other-real-estate-ip-01.png',
-    video: '/videos/other-real-estate-ip-01.mp4',
+    video: videoUrl('other-real-estate-ip-01.mp4'),
     theme: 'blue',
     description: '个人负责视频后期全流程。',
   },
@@ -161,7 +170,7 @@ export const projects = [
     year: '2026',
     role: '个人负责后期全流程',
     image: '/work/thumb-other-real-estate-ip-02.png',
-    video: '/videos/other-real-estate-ip-02.mp4',
+    video: videoUrl('other-real-estate-ip-02.mp4'),
     theme: 'blue',
     description: '个人负责视频后期全流程。',
   },
