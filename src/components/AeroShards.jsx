@@ -14,91 +14,174 @@ const makeRandom = seed => {
   };
 };
 
-const createFallbackShards = (count, seed, layer) => {
-  const random = makeRandom(seed);
-  return Array.from({ length: count }, (_, index) => {
-    const progress = random();
-    const x = -120 + progress * 1840 + (random() - 0.5) * 110;
-    const baseY = layer === 'upper'
-      ? 70 + progress * 230 + Math.sin(progress * 7.2) * 48
-      : layer === 'far'
-        ? 130 + progress * 330 + Math.sin(progress * 8.6 + 0.7) * 72
-        : 170 + progress * 360 + Math.sin(progress * 7.4 + 1.25) * 96;
-    const spread = layer === 'main' ? 250 : layer === 'far' ? 190 : 145;
-    const y = baseY + (random() - 0.5) * spread;
-    const lengthScale = 0.42 + Math.sin(progress * Math.PI) * 0.95;
-    const length = (layer === 'main' ? 9 : 5) + random() * (layer === 'main' ? 37 : 24) * lengthScale;
-    const height = 1.3 + random() * (layer === 'main' ? 8.5 : 5.2);
-    const point = Math.max(1.4, length * (0.16 + random() * 0.22));
-    const skew = (random() - 0.5) * height * 0.9;
-    const angle = 8 + progress * 12 + (random() - 0.5) * 38;
-    const opacity = (layer === 'main' ? 0.18 : 0.08) + random() * (layer === 'main' ? 0.7 : 0.42);
-    const tone = random();
-    const fill = tone > 0.8
-      ? 'url(#aero-fallback-white)'
-      : tone > 0.36
-        ? 'url(#aero-fallback-violet)'
-        : 'url(#aero-fallback-blue)';
-
-    return {
-      id: `${layer}-${index}`,
-      points: `${-length / 2},${-height / 2 + skew} ${length / 2},${-height / 2} ${length / 2 - point},${height / 2 - skew} ${-length / 2 + point},${height / 2}`,
-      transform: `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${angle.toFixed(2)})`,
-      opacity: opacity.toFixed(3),
-      fill
-    };
-  });
-};
-
-const FALLBACK_SHARDS = {
-  far: createFallbackShards(76, 43, 'far'),
-  upper: createFallbackShards(62, 91, 'upper'),
-  main: createFallbackShards(118, 137, 'main')
-};
+const FALLBACK_PALETTE = [
+  [215, 199, 255],
+  [170, 139, 228],
+  [125, 101, 190],
+  [226, 218, 255],
+  [134, 151, 222]
+];
 
 function ShardFallback() {
+  const fallbackCanvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = fallbackCanvasRef.current;
+    if (!canvas) return undefined;
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return undefined;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frameId = 0;
+    let resizeObserver;
+    let particles = [];
+    let width = 1;
+    let height = 1;
+    let dpr = 1;
+    let lastFrame = 0;
+    const startTime = performance.now();
+
+    const createParticles = () => {
+      const random = makeRandom(7781);
+      const count = Math.max(420, Math.min(760, Math.round((width * height) / 3000)));
+      particles = Array.from({ length: count }, (_, index) => ({
+        phase: random(),
+        lane: (random() - 0.5) * 2,
+        drift: random() * Math.PI * 2,
+        size: Math.pow(random(), 2.1),
+        depth: 0.24 + random() * 0.76,
+        speed: 0.006 + random() * 0.012,
+        angle: -0.34 + random() * 0.72,
+        spin: (random() - 0.5) * 0.16,
+        opacity: 0.15 + random() * 0.68,
+        twinkle: random() * Math.PI * 2,
+        track: index % 11 === 0 ? 1 : index % 7 === 0 ? 2 : 0,
+        tone: Math.floor(random() * FALLBACK_PALETTE.length),
+        shape: random()
+      }));
+    };
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      createParticles();
+    };
+
+    const polygon = (x, y, shardWidth, shardHeight, rotation, shape) => {
+      const tip = shardWidth * (0.18 + shape * 0.22);
+      const skew = (shape - 0.5) * shardHeight * 0.8;
+      context.save();
+      context.translate(x, y);
+      context.rotate(rotation);
+      context.beginPath();
+      context.moveTo(-shardWidth * 0.5, -shardHeight * 0.5 + skew);
+      context.lineTo(shardWidth * 0.5, -shardHeight * 0.5);
+      context.lineTo(shardWidth * 0.5 - tip, shardHeight * 0.5 - skew);
+      context.lineTo(-shardWidth * 0.5 + tip, shardHeight * 0.5);
+      context.closePath();
+      context.restore();
+    };
+
+    const draw = timestamp => {
+      const elapsed = reduceMotion.matches ? 0 : (timestamp - startTime) / 1000;
+      context.clearRect(0, 0, width, height);
+      context.globalCompositeOperation = 'screen';
+
+      for (const particle of particles) {
+        const progress = (particle.phase + elapsed * particle.speed) % 1;
+        const travel = progress * 1.22 - 0.11;
+        const wave = Math.sin(progress * Math.PI);
+        const perspective = 0.34 + wave * 0.96;
+        let centerY;
+        let envelope;
+
+        if (particle.track === 1) {
+          centerY = height * (0.08 + progress * 0.23 + Math.sin(progress * 7 + 0.7) * 0.025);
+          envelope = height * (0.07 + wave * 0.1);
+        } else if (particle.track === 2) {
+          centerY = height * (0.26 + progress * 0.42 + Math.sin(progress * 6.2 + 1.8) * 0.045);
+          envelope = height * (0.1 + wave * 0.16);
+        } else {
+          centerY = height * (0.14 + progress * 0.3 + Math.sin(progress * 7.4 + 1.1) * 0.05);
+          envelope = height * (0.095 + wave * 0.2);
+        }
+
+        const x = travel * width + Math.sin(particle.drift + elapsed * 0.11) * width * 0.009;
+        const y = centerY + particle.lane * envelope + Math.sin(particle.drift + progress * 13) * height * 0.018;
+        const size = (1.2 + particle.size * 14) * perspective * particle.depth;
+        const shardWidth = Math.max(1.2, size * (1.7 + particle.shape * 1.4));
+        const shardHeight = Math.max(0.65, size * (0.22 + particle.shape * 0.32));
+        const rotation = particle.angle + progress * 0.3 + elapsed * particle.spin;
+        const shimmer = 0.62 + Math.sin(elapsed * 0.9 + particle.twinkle) * 0.26;
+        const alpha = particle.opacity * particle.depth * shimmer * (0.3 + wave * 0.7);
+        const color = FALLBACK_PALETTE[particle.tone];
+
+        if (particle.size > 0.72) {
+          context.shadowColor = 'rgba(154, 114, 222, 0.34)';
+          context.shadowBlur = 7 * particle.depth;
+        } else {
+          context.shadowBlur = 0;
+        }
+
+        if (particle.shape > 0.84) {
+          polygon(x - 1.15, y, shardWidth, shardHeight, rotation, particle.shape);
+          context.fillStyle = 'rgba(70, 126, 255, ' + alpha * 0.2 + ')';
+          context.fill();
+          polygon(x + 1.15, y, shardWidth, shardHeight, rotation, particle.shape);
+          context.fillStyle = 'rgba(255, 76, 172, ' + alpha * 0.15 + ')';
+          context.fill();
+        }
+
+        polygon(x, y, shardWidth, shardHeight, rotation, particle.shape);
+        context.fillStyle = 'rgba(' + color[0] + ', ' + color[1] + ', ' + color[2] + ', ' + alpha + ')';
+        context.fill();
+
+        if (particle.size > 0.58) {
+          polygon(x, y - shardHeight * 0.18, shardWidth * 0.72, Math.max(0.5, shardHeight * 0.2), rotation, particle.shape);
+          context.fillStyle = 'rgba(244, 237, 255, ' + alpha * 0.6 + ')';
+          context.fill();
+        }
+      }
+
+      context.shadowBlur = 0;
+      context.globalCompositeOperation = 'source-over';
+      if (!reduceMotion.matches) frameId = requestAnimationFrame(render);
+    };
+
+    const render = timestamp => {
+      if (timestamp - lastFrame < 1000 / 30) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+      lastFrame = timestamp;
+      draw(timestamp);
+    };
+
+    resize();
+    draw(performance.now());
+    if ('ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(canvas);
+    } else {
+      window.addEventListener('resize', resize);
+    }
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
   return (
     <div className="aero-shards__fallback" aria-hidden="true">
       <div className="aero-shards__fallback-glow" />
-      <svg
-        className="aero-shards__fallback-svg"
-        viewBox="0 0 1600 900"
-        preserveAspectRatio="xMidYMid slice"
-        focusable="false"
-      >
-        <defs>
-          <linearGradient id="aero-fallback-violet" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#f1e9ff" />
-            <stop offset="0.36" stopColor="#a787e5" />
-            <stop offset="1" stopColor="#4f336f" stopOpacity="0.24" />
-          </linearGradient>
-          <linearGradient id="aero-fallback-blue" x1="0" y1="0" x2="1" y2="0.7">
-            <stop offset="0" stopColor="#b7c9ff" />
-            <stop offset="0.52" stopColor="#7564b8" />
-            <stop offset="1" stopColor="#2a2144" stopOpacity="0.18" />
-          </linearGradient>
-          <linearGradient id="aero-fallback-white" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#ffffff" />
-            <stop offset="0.42" stopColor="#d8c8ff" />
-            <stop offset="1" stopColor="#7b5da8" stopOpacity="0.2" />
-          </linearGradient>
-          <radialGradient id="aero-fallback-haze" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#9b79dc" stopOpacity="0.2" />
-            <stop offset="0.46" stopColor="#5e477f" stopOpacity="0.08" />
-            <stop offset="1" stopColor="#120f17" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <ellipse cx="820" cy="390" rx="740" ry="360" fill="url(#aero-fallback-haze)" />
-        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--far">
-          {FALLBACK_SHARDS.far.map(shard => <polygon key={shard.id} {...shard} />)}
-        </g>
-        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--upper">
-          {FALLBACK_SHARDS.upper.map(shard => <polygon key={shard.id} {...shard} />)}
-        </g>
-        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--main">
-          {FALLBACK_SHARDS.main.map(shard => <polygon key={shard.id} {...shard} />)}
-        </g>
-      </svg>
+      <canvas ref={fallbackCanvasRef} className="aero-shards__fallback-canvas" />
     </div>
   );
 }

@@ -57,41 +57,15 @@
   transform: rotate(2deg);
 }
 
-.aero-shards__fallback-svg {
+.aero-shards__fallback-canvas {
   position: absolute;
   z-index: 1;
-  left: -4%;
-  top: -5%;
-  width: 108%;
-  height: 110%;
-  overflow: visible;
-  mix-blend-mode: screen;
-}
-
-.aero-shards__fallback-stream {
-  transform-box: fill-box;
-  transform-origin: center;
-  will-change: transform, opacity;
-}
-
-.aero-shards__fallback-stream polygon {
-  shape-rendering: geometricPrecision;
-}
-
-.aero-shards__fallback-stream--far {
-  opacity: 0.45;
-  animation: aero-shards-drift-far 18s ease-in-out infinite alternate;
-}
-
-.aero-shards__fallback-stream--upper {
-  opacity: 0.58;
-  animation: aero-shards-drift-upper 15s ease-in-out infinite alternate;
-}
-
-.aero-shards__fallback-stream--main {
-  opacity: 0.82;
-  filter: drop-shadow(0 0 5px rgba(164, 126, 230, 0.22));
-  animation: aero-shards-drift-main 12s ease-in-out infinite alternate;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0.92;
+  filter: saturate(1.04) contrast(1.04);
 }
 
 .aero-shards__canvas {
@@ -116,20 +90,6 @@
   opacity: 1;
 }
 
-@keyframes aero-shards-drift-main {
-  from { transform: translate3d(-1.4%, -0.5%, 0) rotate(-0.4deg) scale(1.01); }
-  to { transform: translate3d(1.7%, 1.1%, 0) rotate(0.55deg) scale(1.025); }
-}
-
-@keyframes aero-shards-drift-upper {
-  from { transform: translate3d(1%, 0, 0) rotate(0.35deg); }
-  to { transform: translate3d(-1.5%, 1.1%, 0) rotate(-0.5deg); }
-}
-
-@keyframes aero-shards-drift-far {
-  from { transform: translate3d(-0.8%, 1%, 0) scale(1.01); }
-  to { transform: translate3d(1.2%, -0.7%, 0) scale(1.025); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .aero-shards__canvas,
@@ -137,7 +97,4 @@
     transition: none;
   }
 
-  .aero-shards__fallback-stream {
-    animation: none;
-  }
 }
