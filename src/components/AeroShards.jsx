@@ -166,7 +166,8 @@ function ShardFallback() {
     };
 
     const draw = timestamp => {
-      const elapsed = reduceMotion.matches ? 0 : (timestamp - startTime) / 1000;
+      const motionScale = reduceMotion.matches ? 0.22 : 1;
+      const elapsed = ((timestamp - startTime) / 1000) * motionScale;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'screen';
 
@@ -228,7 +229,7 @@ function ShardFallback() {
 
       context.shadowBlur = 0;
       context.globalCompositeOperation = 'source-over';
-      if (!reduceMotion.matches) frameId = requestAnimationFrame(render);
+      frameId = requestAnimationFrame(render);
     };
 
     const render = timestamp => {
@@ -1970,11 +1971,12 @@ export default function AeroShards({
 
         const renderFrame = currentFrame => {
           const settings = settingsRef.current;
-          const frozen = settings.paused || reduceMotion.matches || settings.speed <= 0.0001;
+          const reducedMotionScale = reduceMotion.matches ? 0.22 : 1;
+          const frozen = settings.paused || settings.speed <= 0.0001;
           const elapsed =
             resumePending || !previousRenderTimestamp
               ? 0
-              : Math.min(0.05, Math.max(0, (renderTimestamp - previousRenderTimestamp) / 1000));
+              : Math.min(0.05, Math.max(0, (renderTimestamp - previousRenderTimestamp) / 1000)) * reducedMotionScale;
           resumePending = false;
           previousRenderTimestamp = renderTimestamp;
           lastSettingsSignature = settings.signature;
@@ -2165,7 +2167,7 @@ export default function AeroShards({
 
           const settings = settingsRef.current;
           const settingsChanged = settings.signature !== lastSettingsSignature;
-          const frozen = settings.paused || reduceMotion.matches || settings.speed <= 0.0001;
+          const frozen = settings.paused || settings.speed <= 0.0001;
           if (frozen && !firstFrame && !settingsChanged && !needsRender) return;
 
           const forceFrame = firstFrame || settingsChanged || !lastPresentationTimestamp;

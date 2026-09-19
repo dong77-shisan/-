@@ -60,10 +60,10 @@
 .aero-shards__fallback-static {
   position: absolute;
   z-index: 1;
-  inset: -3%;
+  inset: -12%;
   display: block;
-  width: 106%;
-  height: 106%;
+  width: 124%;
+  height: 124%;
   overflow: visible;
   opacity: 0.72;
   mix-blend-mode: screen;
@@ -73,7 +73,8 @@
 .aero-shards__fallback-static-field {
   transform-box: fill-box;
   transform-origin: center;
-  animation: aero-static-shards-drift 20s ease-in-out infinite alternate;
+  will-change: transform;
+  animation: aero-static-shards-flow 12s linear infinite alternate;
 }
 
 .aero-shards__fallback-canvas {
@@ -98,11 +99,12 @@
 }
 
 .aero-shards[data-ready='true'] .aero-shards__canvas {
-  opacity: 1;
+  opacity: 0.88;
 }
 
+/* Keep a local animated safety layer visible even when WebGPU initializes but later stalls. */
 .aero-shards[data-ready='true'] .aero-shards__fallback {
-  opacity: 0;
+  opacity: 0.16;
 }
 
 .aero-shards[data-failed='true'] .aero-shards__fallback {
@@ -110,9 +112,9 @@
 }
 
 
-@keyframes aero-static-shards-drift {
-  from { transform: translate3d(-0.8%, -0.35%, 0) rotate(-0.18deg) scale(1.01); }
-  to { transform: translate3d(0.9%, 0.55%, 0) rotate(0.22deg) scale(1.018); }
+@keyframes aero-static-shards-flow {
+  from { transform: translate3d(-88px, -18px, 0) rotate(-0.7deg) scale(1.045); }
+  to { transform: translate3d(88px, 18px, 0) rotate(0.7deg) scale(1.045); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -122,7 +124,10 @@
   }
 
   .aero-shards__fallback-static-field {
-    animation: none;
+    /* Keep a gentle visual flow even when the global reduced-motion rule is active. */
+    animation-duration: 28s !important;
+    animation-iteration-count: infinite !important;
+    animation-play-state: running !important;
   }
 
 }
