@@ -3,6 +3,106 @@ import { draw, effect, frame, init, sampler, surface, target, uniforms } from 'v
 
 import './AeroShards.css';
 
+const makeRandom = seed => {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6d2b79f5;
+    let result = value;
+    result = Math.imul(result ^ (result >>> 15), result | 1);
+    result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
+    return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+const createFallbackShards = (count, seed, layer) => {
+  const random = makeRandom(seed);
+  return Array.from({ length: count }, (_, index) => {
+    const progress = random();
+    const x = -120 + progress * 1840 + (random() - 0.5) * 110;
+    const baseY = layer === 'upper'
+      ? 70 + progress * 230 + Math.sin(progress * 7.2) * 48
+      : layer === 'far'
+        ? 130 + progress * 330 + Math.sin(progress * 8.6 + 0.7) * 72
+        : 170 + progress * 360 + Math.sin(progress * 7.4 + 1.25) * 96;
+    const spread = layer === 'main' ? 250 : layer === 'far' ? 190 : 145;
+    const y = baseY + (random() - 0.5) * spread;
+    const lengthScale = 0.42 + Math.sin(progress * Math.PI) * 0.95;
+    const length = (layer === 'main' ? 9 : 5) + random() * (layer === 'main' ? 37 : 24) * lengthScale;
+    const height = 1.3 + random() * (layer === 'main' ? 8.5 : 5.2);
+    const point = Math.max(1.4, length * (0.16 + random() * 0.22));
+    const skew = (random() - 0.5) * height * 0.9;
+    const angle = 8 + progress * 12 + (random() - 0.5) * 38;
+    const opacity = (layer === 'main' ? 0.18 : 0.08) + random() * (layer === 'main' ? 0.7 : 0.42);
+    const tone = random();
+    const fill = tone > 0.8
+      ? 'url(#aero-fallback-white)'
+      : tone > 0.36
+        ? 'url(#aero-fallback-violet)'
+        : 'url(#aero-fallback-blue)';
+
+    return {
+      id: `${layer}-${index}`,
+      points: `${-length / 2},${-height / 2 + skew} ${length / 2},${-height / 2} ${length / 2 - point},${height / 2 - skew} ${-length / 2 + point},${height / 2}`,
+      transform: `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${angle.toFixed(2)})`,
+      opacity: opacity.toFixed(3),
+      fill
+    };
+  });
+};
+
+const FALLBACK_SHARDS = {
+  far: createFallbackShards(76, 43, 'far'),
+  upper: createFallbackShards(62, 91, 'upper'),
+  main: createFallbackShards(118, 137, 'main')
+};
+
+function ShardFallback() {
+  return (
+    <div className="aero-shards__fallback" aria-hidden="true">
+      <div className="aero-shards__fallback-glow" />
+      <svg
+        className="aero-shards__fallback-svg"
+        viewBox="0 0 1600 900"
+        preserveAspectRatio="xMidYMid slice"
+        focusable="false"
+      >
+        <defs>
+          <linearGradient id="aero-fallback-violet" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f1e9ff" />
+            <stop offset="0.36" stopColor="#a787e5" />
+            <stop offset="1" stopColor="#4f336f" stopOpacity="0.24" />
+          </linearGradient>
+          <linearGradient id="aero-fallback-blue" x1="0" y1="0" x2="1" y2="0.7">
+            <stop offset="0" stopColor="#b7c9ff" />
+            <stop offset="0.52" stopColor="#7564b8" />
+            <stop offset="1" stopColor="#2a2144" stopOpacity="0.18" />
+          </linearGradient>
+          <linearGradient id="aero-fallback-white" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#ffffff" />
+            <stop offset="0.42" stopColor="#d8c8ff" />
+            <stop offset="1" stopColor="#7b5da8" stopOpacity="0.2" />
+          </linearGradient>
+          <radialGradient id="aero-fallback-haze" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#9b79dc" stopOpacity="0.2" />
+            <stop offset="0.46" stopColor="#5e477f" stopOpacity="0.08" />
+            <stop offset="1" stopColor="#120f17" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <ellipse cx="820" cy="390" rx="740" ry="360" fill="url(#aero-fallback-haze)" />
+        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--far">
+          {FALLBACK_SHARDS.far.map(shard => <polygon key={shard.id} {...shard} />)}
+        </g>
+        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--upper">
+          {FALLBACK_SHARDS.upper.map(shard => <polygon key={shard.id} {...shard} />)}
+        </g>
+        <g className="aero-shards__fallback-stream aero-shards__fallback-stream--main">
+          {FALLBACK_SHARDS.main.map(shard => <polygon key={shard.id} {...shard} />)}
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 const PLACEMENTS = { right: 0, left: 1, center: 2, full: 3 };
 const MATERIALS = { pearl: 0, chrome: 1, satin: 2 };
 const INTERACTIONS = { none: 0, repel: 1, attract: 2 };
@@ -1281,6 +1381,7 @@ export default function AeroShards({
   const ripplesRef = useRef(createRipples());
   const holdRef = useRef(createHold());
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const resolvedMaterial = MATERIAL_PRESETS[material] || MATERIAL_PRESETS.pearl;
   const resolvedDetail = DETAIL_PRESETS[detail] || DETAIL_PRESETS.balanced;
@@ -1421,6 +1522,8 @@ export default function AeroShards({
     const reportFailure = error => {
       if (disposed || runtimeFailed) return;
       runtimeFailed = true;
+      setReady(false);
+      setFailed(true);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       if (timeoutId) window.clearTimeout(timeoutId);
       resizeObserver?.disconnect();
@@ -1582,6 +1685,11 @@ export default function AeroShards({
     void (async () => {
       try {
         setReady(false);
+        setFailed(false);
+        if (!navigator.gpu) {
+          reportFailure(new Error('WebGPU is not supported by this browser or device.'));
+          return;
+        }
         const resolvedQuality = resolveQuality(canvas);
         const preset = QUALITY_PRESETS[resolvedQuality] || QUALITY_PRESETS.medium;
         gpu = await init({ powerPreference: 'low-power' });
@@ -2011,9 +2119,11 @@ export default function AeroShards({
       ref={rootRef}
       className={`aero-shards ${className}`}
       data-ready={ready}
+      data-failed={failed}
       style={{ backgroundColor }}
       aria-hidden="true"
     >
+      <ShardFallback />
       <canvas ref={canvasRef} className="aero-shards__canvas" />
     </div>
   );
